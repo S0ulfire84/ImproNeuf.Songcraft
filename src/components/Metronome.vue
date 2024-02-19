@@ -26,14 +26,22 @@ const props = defineProps({
 
 const emit = defineEmits(["update:bpm", "beat"]);
 
+const loadSound = async (url: string) => {
+  const response = await fetch(url);
+  const arrayBuffer = await response.arrayBuffer();
+  return audioContext.decodeAudioData(arrayBuffer);
+};
+
+const audioContext = new AudioContext();
 let intervalId: number | null = null;
-const audio1 = new Audio("/drum1.wav"); //new Audio("/metronome1.wav");
-const audio2 = new Audio("/drum2.wav"); //new Audio("/metronome2.wav");
-const clap = new Audio("/clap.wav");
-const clap2 = new Audio("/clap.wav");
-const snare = new Audio("/cymbal.wav"); //new Audio("/snare.wav");
+const drum1Promise = loadSound("/drum1.wav"); //new Audio("/metronome1.wav");
+const drum2Promise = loadSound("/drum2.wav"); //new Audio("/metronome2.wav");
+const clapPromise = loadSound("/clap.wav");
+const cymbalPromise = loadSound("/cymbal.wav"); //new Audio("/snare.wav");
 const alternateBeat = ref(true);
 const beatCount = ref(0);
+
+
 
 // Tap rhythm functionality
 const tapTimes = ref<number[]>([]);
@@ -70,32 +78,43 @@ const handleTap = () => {
   tapTimeoutId = setTimeout(resetTapSequence, maxInterval);
 };
 
-const playSound = () => {
+const playSound = async (soundPromise: Promise<AudioBuffer>) => {
+  const soundBuffer = await soundPromise;
+  const source = audioContext.createBufferSource();
+  source.buffer = soundBuffer;
+  source.connect(audioContext.destination);
+  source.start();
+};
+
+const playSoundOfBeat = () => {
   beatCount.value += 1;
   if (beatCount.value % 9 === 0) {
     beatCount.value = 1;
   }
 
   if (beatCount.value === 4) {
-    snare.play();
+    playSound(cymbalPromise);
   }
 
   if (beatCount.value === 8) {
-    clap.play();
-    clap2.play();
+    playSound(clapPromise);
+    playSound(clapPromise);
   }
 
   emit("beat", beatCount.value);
-  const audioToPlay = (alternateBeat.value ? audio1.cloneNode() : audio2.cloneNode()) as HTMLAudioElement;
-  alternateBeat.value = !alternateBeat.value;
-  if (audioToPlay) {
-    audioToPlay.play().catch((error) => console.error("Error playing sound:", error));
+
+  if (alternateBeat.value) {
+    playSound(drum1Promise);
+  } else {
+    playSound(drum2Promise);
   }
+
+  alternateBeat.value = !alternateBeat.value;
 };
 
 const startMetronome = () => {
   const interval = (60 / props.bpm) * 1000;
-  intervalId = setInterval(playSound, interval);
+  intervalId = setInterval(playSoundOfBeat, interval);
   beatCount.value = 0;
   alternateBeat.value = true;
 };
