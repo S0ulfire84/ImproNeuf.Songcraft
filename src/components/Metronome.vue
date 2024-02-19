@@ -9,12 +9,14 @@
     />
     <button style="height: 50px; border-radius: 10px; border: none; background-color: rgb(255 34 100)" @click="handleTap">Tap Rhythm</button>
 
-    <img v-show="false" src="../assets/settings.png" alt="Metronome" style="margin-left: 30px; width: 30px; height: 30px" />
+    <img src="../assets/settings.png" alt="Metronome" style="margin-left: 30px; width: 30px; height: 30px" @click="showLoopEditor = !showLoopEditor" />
+    <BeatLoopEditor v-if="showLoopEditor" :resolution="8" :sounds="sounds" @update:loop-structure="updateLoopStructure" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, watch, onMounted, onUnmounted, defineProps, defineEmits } from "vue";
+import BeatLoopEditor from "./BeatLoopEditor.vue";
 
 const props = defineProps({
   bpm: {
@@ -26,6 +28,7 @@ const props = defineProps({
 
 const emit = defineEmits(["update:bpm", "beat"]);
 const audioContext = ref(new AudioContext());
+const showLoopEditor = ref(false);
 const nextNoteTime = ref(0); // The time when the next note is due.
 const scheduleAheadTime = 0.1; // How far ahead to schedule audio (sec)
 const lookahead = 25.0; // How frequently to call scheduling function (ms)
@@ -36,6 +39,16 @@ const loadSound = async (url: string) => {
   const arrayBuffer = await response.arrayBuffer();
   return audioContext.value.decodeAudioData(arrayBuffer);
 };
+
+const sounds = [
+  { name: "Big clap", beats: [8], sound: loadSound("/big-clap.mp3") },
+  { name: "Finger snap", beats: [2, 6], sound: loadSound("/finger-snap.mp3") },
+  { name: "Hi-hat", beats: [4], sound: loadSound("/hi-hat.mp3") },
+  { name: "Metronome 1", beats: [], sound: loadSound("/metronome1.mp3")},
+  { name: "Metronome 2", beats: [], sound: loadSound("/metronome2.mp3") },
+  { name: "Small clap", beats: [], sound: loadSound("/small-clap.mp3") },
+  // Add more sounds as needed
+];
 
 const drum1Promise = loadSound("/drum1.wav"); //new Audio("/metronome1.wav");
 const drum2Promise = loadSound("/drum2.wav"); //new Audio("/metronome2.wav");
@@ -157,4 +170,11 @@ onUnmounted(() => {
   stopMetronome();
   if (tapTimeoutId) clearTimeout(tapTimeoutId); // Clear the timeout when the component is unmounted
 });
+
+function updateLoopStructure(soundName: string, beat: number, isActive: boolean) {
+  // Update the loop structure based on the checkbox changes.
+  // This is where you would manage the data to be passed around.
+  console.log(soundName, beat, isActive);
+  // Implement your loop structure update logic here.
+}
 </script>
