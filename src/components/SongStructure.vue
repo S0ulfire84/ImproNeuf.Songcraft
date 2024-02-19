@@ -1,7 +1,7 @@
 <template>
   <div class="song">
     <div style="font-size: 5em" v-if="currentSectionIndex < sections.length">
-      {{ sections[currentSectionIndex].section }}
+      {{ sections[currentSectionIndex].phrases }}
     </div>
     <div class="phrase-container" v-for="(phrase, index) in phrases" :key="index">
       <div
@@ -14,23 +14,31 @@
       ></div>
       <div class="phrase-text">{{ phrase }}</div>
     </div>
-    <div v-if="currentSectionIndex + 1 < sections.length" style="font-size: 2em">Next: {{ sections[currentSectionIndex + 1].section }}</div>
+    <div v-if="currentSectionIndex + 1 < sections.length" style="font-size: 2em">Next: {{ sections[currentSectionIndex + 1].phrases }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted } from "vue";
+// Import PropType using a type-only import
+import { computed, ref, watch } from "vue";
+import type { PropType } from "vue";
+
+interface Section {
+  phrases: string[];
+  color: string;
+}
 
 const props = defineProps({
   bpm: Number,
   playing: Boolean,
   beat: Number,
-  sections: Array,
+  // Use PropType for defining the type of props.sections
+  sections: Array as PropType<Section[]>,
 });
 
-const phrases = ref((props.sections[0] as any).phrases);
-const phraseWidths = ref(phrases.value.map(() => 0));
-const phraseColors = ref((props.sections[0] as any).color);
+const phrases = ref<string[]>(props.sections?.[0]?.phrases ?? []);
+const phraseWidths = ref<number[]>(phrases.value.map(() => 0));
+const phraseColors = ref<string[]>(props.sections?.[0]?.color ? [props.sections[0].color] : ["#3f3"]);
 const shouldPlay = computed(() => props.playing);
 const currentIndex = ref(0);
 const currentSectionIndex = ref(0);
@@ -39,33 +47,29 @@ const emit = defineEmits(["done"]);
 watch(
   () => props.beat,
   (beatCount) => {
-    // Update the width of the current phrase
-    phraseWidths.value[currentIndex.value] = (beatCount / 8) * 100;
+    if (typeof beatCount === "number") {
+      // Update the width of the current phrase
+      phraseWidths.value[currentIndex.value] = (beatCount / 8) * 100;
 
-    // Advance to the next phrase when transitioning from beat 8 to beat 1
-    if (beatCount === 8) {
-      // This will move to the next phrase after beat 8 is reached
-      currentIndex.value++;
+      // Advance to the next phrase when transitioning from beat 8 to beat 1
+      if (beatCount === 8) {
+        currentIndex.value++;
 
-      console.log("phrase index" + currentIndex.value + " started");
+        if (currentIndex.value === phrases.value.length) {
+          currentIndex.value = 0;
+          phraseWidths.value = phrases.value.map(() => 0);
+          currentSectionIndex.value++;
 
-      if (currentIndex.value === phrases.value.length) {
-        console.log("done");
-        console.log("current index", currentIndex.value);
-        console.log("phrases length", phrases.value.length);
-        console.log("phrases", phrases);
-        currentIndex.value = 0;
-        phraseWidths.value = phrases.value.map(() => 0);
-        currentSectionIndex.value++;
+          // Check if sections is not undefined before accessing its length
+          if (currentSectionIndex.value < (props.sections?.length ?? 0)) {
+            const nextSection = props.sections ? props.sections[currentSectionIndex.value] : null;
+            phrases.value = nextSection?.phrases ?? [];
+            phraseColors.value = nextSection?.color ? [nextSection.color] : ["#3f3"];
+          }
 
-        // As long as we haven't reached the end of the song, update the phrases
-        if (currentSectionIndex.value < props.sections.length) {
-          phrases.value = (props.sections[currentSectionIndex.value] as any).phrases;
-          phraseColors.value = (props.sections[currentSectionIndex.value] as any).color;
-        }
-
-        if (currentSectionIndex.value === props.sections.length) {
-          emit("done");
+          if (currentSectionIndex.value === (props.sections?.length ?? 0)) {
+            emit("done");
+          }
         }
       }
     }
@@ -84,13 +88,13 @@ watch(
 .phrase-container {
   display: flex;
   background-color: #333;
-  color: white; /* text color */
-  width: 100%; /* initial width */
+  color: white;
+  width: 100%;
   justify-content: center;
   align-items: center;
   padding: 0.5rem;
-  margin: 0.8rem 0; /* spacing between verses */
-  transition: width 1s linear; /* smooth transition for width */
+  margin: 0.8rem 0;
+  transition: width 1s linear;
   border-radius: 0.7rem;
 }
 
