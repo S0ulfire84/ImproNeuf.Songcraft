@@ -25,23 +25,24 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["update:bpm", "beat"]);
+const audioContext = ref(new AudioContext());
+const nextNoteTime = ref(0); // The time when the next note is due.
+const scheduleAheadTime = 0.1; // How far ahead to schedule audio (sec)
+const lookahead = 25.0; // How frequently to call scheduling function (ms)
+let timerID: number | null = null;
 
 const loadSound = async (url: string) => {
   const response = await fetch(url);
   const arrayBuffer = await response.arrayBuffer();
-  return audioContext.decodeAudioData(arrayBuffer);
+  return audioContext.value.decodeAudioData(arrayBuffer);
 };
 
-const audioContext = new AudioContext();
-let intervalId: number | null = null;
 const drum1Promise = loadSound("/drum1.wav"); //new Audio("/metronome1.wav");
 const drum2Promise = loadSound("/drum2.wav"); //new Audio("/metronome2.wav");
 const clapPromise = loadSound("/clap.wav");
 const cymbalPromise = loadSound("/cymbal.wav"); //new Audio("/snare.wav");
 const alternateBeat = ref(true);
 const beatCount = ref(0);
-
-
 
 // Tap rhythm functionality
 const tapTimes = ref<number[]>([]);
@@ -78,50 +79,57 @@ const handleTap = () => {
   tapTimeoutId = setTimeout(resetTapSequence, maxInterval);
 };
 
-const playSound = async (soundPromise: Promise<AudioBuffer>) => {
+const playSound = async (soundPromise: Promise<AudioBuffer>, time: number) => {
   const soundBuffer = await soundPromise;
-  const source = audioContext.createBufferSource();
+  const source = audioContext.value.createBufferSource();
   source.buffer = soundBuffer;
-  source.connect(audioContext.destination);
-  source.start();
+  source.connect(audioContext.value.destination);
+  source.start(time);
 };
 
-const playSoundOfBeat = () => {
+const playSoundOfBeat = (time: number) => {
   beatCount.value += 1;
   if (beatCount.value % 9 === 0) {
     beatCount.value = 1;
   }
-
   if (beatCount.value === 4) {
-    playSound(cymbalPromise);
+    playSound(cymbalPromise, time);
   }
-
   if (beatCount.value === 8) {
-    playSound(clapPromise);
-    playSound(clapPromise);
+    playSound(clapPromise, time);
+    playSound(clapPromise, time); // This will play the clap sound twice almost simultaneously
   }
 
   emit("beat", beatCount.value);
 
-  if (alternateBeat.value) {
-    playSound(drum1Promise);
-  } else {
-    playSound(drum2Promise);
-  }
+  const soundToPlay = alternateBeat.value ? drum1Promise : drum2Promise;
+  playSound(soundToPlay, time);
 
   alternateBeat.value = !alternateBeat.value;
 };
 
+const scheduler = () => {
+  while (nextNoteTime.value < audioContext.value.currentTime + scheduleAheadTime) {
+    const time = nextNoteTime.value;
+    playSoundOfBeat(time); // Pass the exact time to play the sound
+    const secondsPerBeat = 60.0 / props.bpm;
+    nextNoteTime.value += secondsPerBeat; // Add beat length to last beat time
+  }
+  timerID = setTimeout(scheduler, lookahead);
+};
+
 const startMetronome = () => {
-  const interval = (60 / props.bpm) * 1000;
-  intervalId = setInterval(playSoundOfBeat, interval);
-  beatCount.value = 0;
-  alternateBeat.value = true;
+  if (props.playing && !timerID) {
+    nextNoteTime.value = audioContext.value.currentTime;
+    scheduler(); // Start the scheduling loop
+  }
 };
 
 const stopMetronome = () => {
-  if (intervalId !== null) clearInterval(intervalId);
-  intervalId = null;
+  if (timerID) {
+    clearTimeout(timerID);
+    timerID = null;
+  }
 };
 
 const updateBpm = (event: Event) => {
