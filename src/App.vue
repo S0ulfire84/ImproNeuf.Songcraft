@@ -10,5 +10,6 @@ import Songcraft from "./components/Songcraft.vue";
 body {
   width: 100%;
   display: block;
+  background-color: #222;
 }
 </style>

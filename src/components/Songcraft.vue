@@ -8,13 +8,13 @@
       <metronome v-show="!playing" :playing="playing" :bpm="bpm" @update:bpm="bpm = $event" @beat="beat" />
 
       <!-- Beat count-->
-      <div v-show="playing" style="font-size: 5em; height: 50px; position: relative; bottom: 35px; margin-left: 20px">
+      <div v-show="playing" style="font-size: 5em; height: 50px; position: relative; color: #ccc; bottom: 35px; margin-left: 20px">
         {{ beatCount }}
       </div>
 
       <!-- Use random BPM -->
       <input v-if="!playing" type="checkbox" v-model="useRandomBpm" style="width: 50px; height: 50px; margin-left: 50px" />
-      <div v-if="!playing" style="font-size: 2em; height: 50px; position: relative">Use random BPM</div>
+      <div v-if="!playing" style="font-size: 2em; height: 50px; position: relative; color: #ccc">Use random BPM</div>
 
       <!-- Songcraft logo and title -->
       <div v-if="!playing" style="display: flex; flex-direction: row; margin-left: auto; margin-bottom: 10px">
@@ -74,41 +74,41 @@ const defaultPhraseColors = ["#4ddd21", "#bedd21", "#f4b010", "#d2042a"];
 const defaultAABAColors = ["#106ff4", "#106ff4", "#f47600", "#106ff4"];
 const duetColorsPersonA = ["#106ff4", "#106ff4", "#106ff4", "#106ff4"];
 const duetColorsPersonB = ["#d2042a", "#d2042a", "#d2042a", "#d2042a"];
-const defaultTaglinePhrases = ["Phrase 1", "Phrase 2", "Phrase 3", "Tagline"];
+const defaultTaglinePhrases = ["Phrase 1", "Phrase 2", "Phrase 3", "TAGLINE"];
 const chorusAABA = ["Phrase A", "Phrase A", "Phrase B", "Phrase A"];
-const chorusTagline = ["Tagline", "Tagline", "Tagline", "Tagline"];
+const chorusTagline = ["TAGLINE", "TAGLINE", "TAGLINE", "TAGLINE"];
 
 const defaultSections: Section[] = [
   {
-    section: "Just listen",
+    sectionName: "Just listen",
     phrases: listenPhrases,
     colors: listenColors,
   },
   {
-    section: "First Verse",
+    sectionName: "First Verse",
     phrases: defaultPhrases,
     colors: defaultPhraseColors,
   },
   {
-    section: "Second Verse",
+    sectionName: "Second Verse",
     phrases: defaultPhrases,
     colors: defaultPhraseColors,
   },
-  { section: "Chorus", phrases: chorusAABA, colors: defaultAABAColors },
-  { section: "Repeat Chorus", phrases: chorusAABA, colors: defaultAABAColors },
+  { sectionName: "Chorus", phrases: chorusAABA, colors: defaultAABAColors },
+  { sectionName: "Repeat Chorus", phrases: chorusAABA, colors: defaultAABAColors },
   {
-    section: "Third Verse",
+    sectionName: "Third Verse",
     phrases: defaultPhrases,
     colors: defaultPhraseColors,
   },
   {
-    section: "Fourth Verse",
+    sectionName: "Fourth Verse",
     phrases: defaultPhrases,
     colors: defaultPhraseColors,
   },
-  { section: "Chorus", phrases: chorusAABA, colors: defaultAABAColors },
+  { sectionName: "Chorus", phrases: chorusAABA, colors: defaultAABAColors },
   {
-    section: "Repeat Chorus End Song",
+    sectionName: "Repeat Chorus End Song",
     phrases: chorusAABA,
     colors: defaultAABAColors,
   },
@@ -140,33 +140,33 @@ function startEmotionalSong() {
 
   sections.value = [
     {
-      section: "Just listen",
+      sectionName: "Just listen",
       phrases: listenPhrases,
       colors: listenColors,
     },
     {
-      section: "First Verse with Tagline",
+      sectionName: "First Verse with Tagline",
       phrases: defaultTaglinePhrases,
       colors: defaultPhraseColors,
     },
     {
-      section: "Second Verse with Tagline",
+      sectionName: "Second Verse with Tagline",
       phrases: defaultTaglinePhrases,
       colors: defaultPhraseColors,
     },
     {
-      section: "First Bridge",
+      sectionName: "First Bridge",
       phrases: defaultPhrases,
       colors: defaultPhraseColors,
     },
     {
-      section: "Second Bridge",
+      sectionName: "Second Bridge",
       phrases: defaultPhrases,
       colors: defaultPhraseColors,
     },
-    { section: "Chorus", phrases: chorusTagline, colors: defaultPhraseColors },
+    { sectionName: "Chorus", phrases: chorusTagline, colors: defaultPhraseColors },
     {
-      section: "Repeat Chorus End Song",
+      sectionName: "Repeat Chorus End Song",
       phrases: chorusTagline,
       colors: defaultPhraseColors,
     },
@@ -180,15 +180,15 @@ function startStandardMusicalSong() {
   sections.value = defaultSections;
 
   sections.value = [
-    { section: "Just listen", phrases: listenPhrases, colors: listenColors },
-    { section: "Captain First Verse", phrases: defaultPhrases, colors: duetColorsPersonA },
-    { section: "Co-player Second Verse", phrases: defaultPhrases, colors: duetColorsPersonB },
-    { section: "Chorus", phrases: chorusAABA, colors: defaultAABAColors },
-    { section: "Repeat Chorus", phrases: chorusAABA, colors: defaultAABAColors },
-    { section: "Co-player First Verse", phrases: defaultPhrases, colors: duetColorsPersonB },
-    { section: "Captain Second Verse", phrases: defaultPhrases, colors: duetColorsPersonA },
-    { section: "Chorus", phrases: chorusAABA, colors: defaultAABAColors },
-    { section: "Repeat Chorus End Song", phrases: chorusAABA, colors: defaultAABAColors },
+    { sectionName: "Just listen", phrases: listenPhrases, colors: listenColors },
+    { sectionName: "Captain First Verse", phrases: defaultPhrases, colors: duetColorsPersonA },
+    { sectionName: "Co-player Second Verse", phrases: defaultPhrases, colors: duetColorsPersonB },
+    { sectionName: "Chorus", phrases: chorusAABA, colors: defaultAABAColors },
+    { sectionName: "Repeat Chorus", phrases: chorusAABA, colors: defaultAABAColors },
+    { sectionName: "Co-player First Verse", phrases: defaultPhrases, colors: duetColorsPersonB },
+    { sectionName: "Captain Second Verse", phrases: defaultPhrases, colors: duetColorsPersonA },
+    { sectionName: "Chorus", phrases: chorusAABA, colors: defaultAABAColors },
+    { sectionName: "Repeat Chorus End Song", phrases: chorusAABA, colors: defaultAABAColors },
   ];
 }
 

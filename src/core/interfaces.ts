@@ -1,5 +1,5 @@
 export interface Section {
-  section: string;
+  sectionName: string;
   phrases: string[];
   colors: string[];
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="song">
-    <div style="font-size: 5em" v-if="currentSectionIndex < sections.length">
-      {{ sections[currentSectionIndex].phrases }}
+    <div style="font-size: 8em" v-if="currentSectionIndex < sections.length">
+      {{ sections[currentSectionIndex].sectionName }}
     </div>
     <div class="phrase-container" v-for="(phrase, index) in phrases" :key="index">
       <div
@@ -14,7 +14,7 @@
       ></div>
       <div class="phrase-text">{{ phrase }}</div>
     </div>
-    <div v-if="currentSectionIndex + 1 < sections.length" style="font-size: 2em">Next: {{ sections[currentSectionIndex + 1].phrases }}</div>
+    <div v-if="currentSectionIndex + 1 < sections.length" style="font-size: 5em">Next: {{ sections[currentSectionIndex + 1].sectionName }}</div>
   </div>
 </template>
 
@@ -91,7 +91,7 @@ watch(
   width: 100%;
   justify-content: center;
   align-items: center;
-  padding: 0.5rem;
+  padding: 1.5rem;
   margin: 0.8rem 0;
   transition: width 1s linear;
   border-radius: 0.7rem;
@@ -100,12 +100,13 @@ watch(
 .phrase-progress {
   height: 100%;
   border-radius: 0.7rem;
+  padding-top: 7.5rem;
 }
 
 .phrase-text {
   position: absolute;
   z-index: 1;
-  font-size: 4em;
-  padding: 0.5em;
+  font-size: 7em;
+  padding: 2.5em;
 }
 </style>
