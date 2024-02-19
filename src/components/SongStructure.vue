@@ -22,23 +22,22 @@
 // Import PropType using a type-only import
 import { computed, ref, watch } from "vue";
 import type { PropType } from "vue";
-
-interface Section {
-  phrases: string[];
-  color: string;
-}
+import type { Section } from "@/core/interfaces.ts";
 
 const props = defineProps({
   bpm: Number,
   playing: Boolean,
   beat: Number,
   // Use PropType for defining the type of props.sections
-  sections: Array as PropType<Section[]>,
+  sections: {
+    type: Array as PropType<Section[]>,
+    default: () => [],
+  },
 });
 
 const phrases = ref<string[]>(props.sections?.[0]?.phrases ?? []);
 const phraseWidths = ref<number[]>(phrases.value.map(() => 0));
-const phraseColors = ref<string[]>(props.sections?.[0]?.color ? [props.sections[0].color] : ["#3f3"]);
+const phraseColors = ref<string[]>(props.sections?.[0]?.colors ? props.sections[0].colors : ["#3f3"]);
 const shouldPlay = computed(() => props.playing);
 const currentIndex = ref(0);
 const currentSectionIndex = ref(0);
@@ -64,7 +63,7 @@ watch(
           if (currentSectionIndex.value < (props.sections?.length ?? 0)) {
             const nextSection = props.sections ? props.sections[currentSectionIndex.value] : null;
             phrases.value = nextSection?.phrases ?? [];
-            phraseColors.value = nextSection?.color ? [nextSection.color] : ["#3f3"];
+            phraseColors.value = nextSection?.colors ? nextSection.colors : ["#3f3"];
           }
 
           if (currentSectionIndex.value === (props.sections?.length ?? 0)) {

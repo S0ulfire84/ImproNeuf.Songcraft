@@ -65,6 +65,7 @@
 import { ref } from "vue";
 import Metronome from "./Metronome.vue";
 import SongStructure from "./SongStructure.vue";
+import type { Section } from "@/core/interfaces.ts";
 
 const defaultPhrases = ["Phrase 1", "Phrase 2", "Phrase 3", "Phrase 4"];
 const listenPhrases = ["Listen in", "Keep Listening", "Listen to the rhythm", "Be ready to start at 8"];
@@ -77,46 +78,46 @@ const defaultTaglinePhrases = ["Phrase 1", "Phrase 2", "Phrase 3", "Tagline"];
 const chorusAABA = ["Phrase A", "Phrase A", "Phrase B", "Phrase A"];
 const chorusTagline = ["Tagline", "Tagline", "Tagline", "Tagline"];
 
-const defaultSections = [
+const defaultSections: Section[] = [
   {
     section: "Just listen",
     phrases: listenPhrases,
-    color: listenColors,
+    colors: listenColors,
   },
   {
     section: "First Verse",
     phrases: defaultPhrases,
-    color: defaultPhraseColors,
+    colors: defaultPhraseColors,
   },
   {
     section: "Second Verse",
     phrases: defaultPhrases,
-    color: defaultPhraseColors,
+    colors: defaultPhraseColors,
   },
-  { section: "Chorus", phrases: chorusAABA, color: defaultAABAColors },
-  { section: "Repeat Chorus", phrases: chorusAABA, color: defaultAABAColors },
+  { section: "Chorus", phrases: chorusAABA, colors: defaultAABAColors },
+  { section: "Repeat Chorus", phrases: chorusAABA, colors: defaultAABAColors },
   {
     section: "Third Verse",
     phrases: defaultPhrases,
-    color: defaultPhraseColors,
+    colors: defaultPhraseColors,
   },
   {
     section: "Fourth Verse",
     phrases: defaultPhrases,
-    color: defaultPhraseColors,
+    colors: defaultPhraseColors,
   },
-  { section: "Chorus", phrases: chorusAABA, color: defaultAABAColors },
+  { section: "Chorus", phrases: chorusAABA, colors: defaultAABAColors },
   {
     section: "Repeat Chorus End Song",
     phrases: chorusAABA,
-    color: defaultAABAColors,
+    colors: defaultAABAColors,
   },
 ];
 
 const bpm = ref(100);
 const playing = ref(false);
 const beatCount = ref(0);
-const sections = ref(defaultSections);
+const sections = ref<Section[]>(defaultSections);
 const useRandomBpm = ref(false);
 
 const phrases = ref(defaultPhrases);
@@ -141,33 +142,33 @@ function startEmotionalSong() {
     {
       section: "Just listen",
       phrases: listenPhrases,
-      color: listenColors,
+      colors: listenColors,
     },
     {
       section: "First Verse with Tagline",
       phrases: defaultTaglinePhrases,
-      color: defaultPhraseColors,
+      colors: defaultPhraseColors,
     },
     {
       section: "Second Verse with Tagline",
       phrases: defaultTaglinePhrases,
-      color: defaultPhraseColors,
+      colors: defaultPhraseColors,
     },
     {
       section: "First Bridge",
       phrases: defaultPhrases,
-      color: defaultPhraseColors,
+      colors: defaultPhraseColors,
     },
     {
       section: "Second Bridge",
       phrases: defaultPhrases,
-      color: defaultPhraseColors,
+      colors: defaultPhraseColors,
     },
-    { section: "Chorus", phrases: chorusTagline, color: defaultPhraseColors },
+    { section: "Chorus", phrases: chorusTagline, colors: defaultPhraseColors },
     {
       section: "Repeat Chorus End Song",
       phrases: chorusTagline,
-      color: defaultPhraseColors,
+      colors: defaultPhraseColors,
     },
   ];
 }
@@ -179,15 +180,15 @@ function startStandardMusicalSong() {
   sections.value = defaultSections;
 
   sections.value = [
-    { section: "Just listen", phrases: listenPhrases, color: listenColors },
-    { section: "Captain First Verse", phrases: defaultPhrases, color: duetColorsPersonA },
-    { section: "Co-player Second Verse", phrases: defaultPhrases, color: duetColorsPersonB },
-    { section: "Chorus", phrases: chorusAABA, color: defaultAABAColors },
-    { section: "Repeat Chorus", phrases: chorusAABA, color: defaultAABAColors },
-    { section: "Co-player First Verse", phrases: defaultPhrases, color: duetColorsPersonB },
-    { section: "Captain Second Verse", phrases: defaultPhrases, color: duetColorsPersonA },
-    { section: "Chorus", phrases: chorusAABA, color: defaultAABAColors },
-    { section: "Repeat Chorus End Song", phrases: chorusAABA, color: defaultAABAColors },
+    { section: "Just listen", phrases: listenPhrases, colors: listenColors },
+    { section: "Captain First Verse", phrases: defaultPhrases, colors: duetColorsPersonA },
+    { section: "Co-player Second Verse", phrases: defaultPhrases, colors: duetColorsPersonB },
+    { section: "Chorus", phrases: chorusAABA, colors: defaultAABAColors },
+    { section: "Repeat Chorus", phrases: chorusAABA, colors: defaultAABAColors },
+    { section: "Co-player First Verse", phrases: defaultPhrases, colors: duetColorsPersonB },
+    { section: "Captain Second Verse", phrases: defaultPhrases, colors: duetColorsPersonA },
+    { section: "Chorus", phrases: chorusAABA, colors: defaultAABAColors },
+    { section: "Repeat Chorus End Song", phrases: chorusAABA, colors: defaultAABAColors },
   ];
 }
 
@@ -198,7 +199,7 @@ function startUpbeatMusicalSong() {
   sections.value = defaultSections;
 }
 
-function setBpmBetweenRange(min, max) {
+function setBpmBetweenRange(min: number, max: number) {
   if (!playing.value) {
     bpm.value = Math.floor(Math.random() * (max - min) + min);
   }
@@ -208,7 +209,7 @@ function stopSong() {
   playing.value = false;
 }
 
-function beat(beatNumber) {
+function beat(beatNumber: number) {
   console.log(beatNumber);
   beatCount.value = beatNumber;
 }
