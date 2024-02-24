@@ -1,18 +1,19 @@
 <template>
   <div class="song">
-    <div style="font-size: 8em" v-if="currentSectionIndex < sections.length">
+    <div style="font-size: 5em" v-if="currentSectionIndex < sections.length">
       {{ sections[currentSectionIndex].sectionName }}
     </div>
-    <div class="phrase-container" v-for="(phrase, index) in phrases" :key="index">
-      <div
-        class="phrase-progress"
-        :style="{
-          width: phraseWidths[index] + '%',
-          backgroundColor: shouldPlay ? phraseColors[index] : 'grey',
-          height: '50px',
-        }"
-      ></div>
-      <div class="phrase-text">{{ phrase }}</div>
+    <div class="song-structure">
+      <div class="phrase-container" v-for="(phrase, index) in phrases" :key="index">
+        <div
+          class="phrase-progress"
+          :style="{
+            width: phraseWidths[index] + '%',
+            backgroundColor: shouldPlay ? phraseColors[index] : 'grey',
+          }"
+        ></div>
+        <div class="phrase-text">{{ phrase }}</div>
+      </div>
     </div>
     <div v-if="currentSectionIndex + 1 < sections.length" style="font-size: 5em">Next: {{ sections[currentSectionIndex + 1].sectionName }}</div>
   </div>
@@ -91,22 +92,30 @@ watch(
   width: 100%;
   justify-content: center;
   align-items: center;
-  padding: 1.5rem;
+  padding: 0.5rem;
   margin: 0.8rem 0;
   transition: width 1s linear;
   border-radius: 0.7rem;
 }
 
 .phrase-progress {
-  height: 100%;
   border-radius: 0.7rem;
-  padding-top: 7.5rem;
+  height: 11vh;
+}
+
+.song-structure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 80%;
 }
 
 .phrase-text {
   position: absolute;
   z-index: 1;
-  font-size: 7em;
-  padding: 2.5em;
+  font-size: 10vh;
+  display: inline;
 }
 </style>
