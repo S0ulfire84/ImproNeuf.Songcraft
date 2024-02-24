@@ -38,8 +38,14 @@ const props = defineProps({
   playing: Boolean,
 });
 
+interface SoundBeat {
+  name: string;
+  beats: number[];
+  sound: Promise<AudioBuffer>;
+}
+
 const emit = defineEmits(["update:bpm", "beat"]);
-const audioContext = ref(null);
+const audioContext = ref<AudioContext | null>(null);
 const showLoopEditor = ref(false);
 const resolution = ref(8); // Number of beats per phrase
 const nextNoteTime = ref(0);
@@ -49,9 +55,11 @@ let timerID: number | null = null;
 
 function initializeSoundSystem() {
   audioContext.value = new AudioContext();
-  const loadSound = async (url: string) => {
+  const loadSound = async (url: string): Promise<AudioBuffer> => {
+    if (!audioContext.value) throw new Error("AudioContext not initialized");
     const response = await fetch(url);
     const arrayBuffer = await response.arrayBuffer();
+    // Ensure decodeAudioData always resolves to AudioBuffer or throws an error
     return audioContext.value.decodeAudioData(arrayBuffer);
   };
 
@@ -65,7 +73,7 @@ function initializeSoundSystem() {
   ];
 }
 
-const sounds = ref([]);
+const sounds = ref<SoundBeat[]>([]);
 const alternateBeat = ref(true);
 const beatCount = ref(0);
 
@@ -102,6 +110,9 @@ const handleTap = () => {
 };
 
 const playSound = async (soundPromise: Promise<AudioBuffer>, time: number) => {
+  if (!audioContext.value) {
+    throw new Error("Audio context not initialized");
+  }
   const soundBuffer = await soundPromise;
   const source = audioContext.value.createBufferSource();
   source.buffer = soundBuffer;
@@ -109,14 +120,19 @@ const playSound = async (soundPromise: Promise<AudioBuffer>, time: number) => {
   source.start(time);
 };
 
-const playSoundOfBeat = (time: number) => {
-  beatCount.value = (beatCount.value % resolution.value) + 1; // Ensure beatCount loops within the current resolution
+const playSoundOfBeat = async (time: number) => {
+  beatCount.value = (beatCount.value % resolution.value) + 1;
 
-  sounds.value.forEach(async (sound) => {
+  for (const sound of sounds.value) {
     if (sound.beats.includes(beatCount.value)) {
-      await playSound(sound.sound, time);
+      try {
+        await playSound(sound.sound, time);
+      } catch (error) {
+        console.error("Failed to play sound:", error);
+        // Handle the error, e.g., by skipping this sound
+      }
     }
-  });
+  }
 
   emit("beat", beatCount.value);
 };
@@ -126,7 +142,12 @@ const toggleLoopEditor = () => {
 };
 
 const scheduler = () => {
-  while (nextNoteTime.value < audioContext.value.currentTime + scheduleAheadTime) {
+  if (!audioContext.value) {
+    console.error("nextNoteTime or audioContext is null", nextNoteTime.value, audioContext.value);
+    throw new Error("nextNoteTime or audioContext is null");
+  }
+
+  while (nextNoteTime.value < audioContext.value?.currentTime + scheduleAheadTime) {
     const time = nextNoteTime.value;
     playSoundOfBeat(time); // Pass the exact time to play the sound
     const secondsPerBeat = 60.0 / props.bpm;
@@ -137,6 +158,11 @@ const scheduler = () => {
 
 const startMetronome = () => {
   initializeSoundSystem();
+
+  if (!audioContext.value) {
+    throw new Error("Audio context not initialized");
+  }
+
   beatCount.value = 0;
 
   if (props.playing && !timerID) {
