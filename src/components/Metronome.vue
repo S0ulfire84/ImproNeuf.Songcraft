@@ -1,20 +1,34 @@
 <template>
   <div style="display: flex; flex-direction: row">
     <input
-      style="font-size: 3em; width: 110px; height: 50px; margin-right: 10px; border-radius: 5px"
+      style="font-size: 3em; width: 110px; height: 50px; margin-right: 10px; border-radius: 5px; color: black"
       type="number"
       :value="bpm"
       @input="updateBpm($event)"
       placeholder="Set BPM"
     />
-    <button style="height: 50px; border-radius: 10px; border: none; background-color: rgb(255 34 100)" @click="handleTap">Tap Rhythm</button>
-
-    <img v-show="false" src="../assets/settings.png" alt="Metronome" style="margin-left: 30px; width: 30px; height: 30px" />
+    <button
+      style="
+        height: 50px;
+        border-radius: 10px;
+        border: none;
+        background-color: rgb(255 34 100);
+        color: black;
+        padding-left: 10px;
+        padding-right: 10px;
+      "
+      @click="handleTap"
+    >
+      Tap Rhythm
+    </button>
+    <img v-if="false" src="../assets/settings.png" alt="Metronome" style="margin-left: 30px; width: 30px; height: 30px" @click="toggleLoopEditor" />
+    <BeatLoopEditor v-if="showLoopEditor" :resolution="resolution" :sounds="sounds" @update:loop-structure="updateLoopStructure" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, watch, onMounted, onUnmounted, defineProps, defineEmits } from "vue";
+import BeatLoopEditor from "./BeatLoopEditor.vue";
 
 const props = defineProps({
   bpm: {
@@ -25,22 +39,33 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["update:bpm", "beat"]);
-const audioContext = ref(new AudioContext());
-const nextNoteTime = ref(0); // The time when the next note is due.
-const scheduleAheadTime = 0.1; // How far ahead to schedule audio (sec)
-const lookahead = 25.0; // How frequently to call scheduling function (ms)
+const audioContext = ref(null);
+const showLoopEditor = ref(false);
+const resolution = ref(8); // Number of beats per phrase
+const nextNoteTime = ref(0);
+const scheduleAheadTime = 0.1;
+const lookahead = 25.0;
 let timerID: number | null = null;
 
-const loadSound = async (url: string) => {
-  const response = await fetch(url);
-  const arrayBuffer = await response.arrayBuffer();
-  return audioContext.value.decodeAudioData(arrayBuffer);
-};
+function initializeSoundSystem() {
+  audioContext.value = new AudioContext();
+  const loadSound = async (url: string) => {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    return audioContext.value.decodeAudioData(arrayBuffer);
+  };
 
-const drum1Promise = loadSound("/drum1.wav"); //new Audio("/metronome1.wav");
-const drum2Promise = loadSound("/drum2.wav"); //new Audio("/metronome2.wav");
-const clapPromise = loadSound("/clap.wav");
-const cymbalPromise = loadSound("/cymbal.wav"); //new Audio("/snare.wav");
+  sounds.value = [
+    { name: "Big clap", beats: [8], sound: loadSound("/big-clap.mp3") },
+    { name: "Finger snap", beats: [2, 6], sound: loadSound("/finger-snap.mp3") },
+    { name: "Hi-hat", beats: [4], sound: loadSound("/hi-hat.mp3") },
+    { name: "Metronome 1", beats: [], sound: loadSound("/metronome1.mp3") },
+    { name: "Metronome 2", beats: [], sound: loadSound("/metronome2.mp3") },
+    { name: "Small clap", beats: [], sound: loadSound("/small-clap.mp3") },
+  ];
+}
+
+const sounds = ref([]);
 const alternateBeat = ref(true);
 const beatCount = ref(0);
 
@@ -74,9 +99,6 @@ const handleTap = () => {
       emit("update:bpm", newBpm);
     }
   }
-
-  if (tapTimeoutId) clearTimeout(tapTimeoutId);
-  tapTimeoutId = setTimeout(resetTapSequence, maxInterval);
 };
 
 const playSound = async (soundPromise: Promise<AudioBuffer>, time: number) => {
@@ -88,24 +110,19 @@ const playSound = async (soundPromise: Promise<AudioBuffer>, time: number) => {
 };
 
 const playSoundOfBeat = (time: number) => {
-  beatCount.value += 1;
-  if (beatCount.value % 9 === 0) {
-    beatCount.value = 1;
-  }
-  if (beatCount.value === 4) {
-    playSound(cymbalPromise, time);
-  }
-  if (beatCount.value === 8) {
-    playSound(clapPromise, time);
-    playSound(clapPromise, time); // This will play the clap sound twice almost simultaneously
-  }
+  beatCount.value = (beatCount.value % resolution.value) + 1; // Ensure beatCount loops within the current resolution
+
+  sounds.value.forEach(async (sound) => {
+    if (sound.beats.includes(beatCount.value)) {
+      await playSound(sound.sound, time);
+    }
+  });
 
   emit("beat", beatCount.value);
+};
 
-  const soundToPlay = alternateBeat.value ? drum1Promise : drum2Promise;
-  playSound(soundToPlay, time);
-
-  alternateBeat.value = !alternateBeat.value;
+const toggleLoopEditor = () => {
+  showLoopEditor.value = !showLoopEditor.value;
 };
 
 const scheduler = () => {
@@ -119,6 +136,9 @@ const scheduler = () => {
 };
 
 const startMetronome = () => {
+  initializeSoundSystem();
+  beatCount.value = 0;
+
   if (props.playing && !timerID) {
     nextNoteTime.value = audioContext.value.currentTime;
     scheduler(); // Start the scheduling loop
@@ -157,4 +177,10 @@ onUnmounted(() => {
   stopMetronome();
   if (tapTimeoutId) clearTimeout(tapTimeoutId); // Clear the timeout when the component is unmounted
 });
+
+function updateLoopStructure(soundName: string, beat: number, isActive: boolean) {
+  // Here, you'd update the sounds array based on user interaction with the BeatLoopEditor
+  console.log(soundName, beat, isActive);
+  // For simplicity, this function prints the parameters. You should implement actual update logic.
+}
 </script>
