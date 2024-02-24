@@ -135,7 +135,7 @@ function startSong() {
 }
 
 function startEmotionalSong() {
-  if (useRandomBpm) setBpmBetweenRange(60, 90);
+  if (useRandomBpm.value) setBpmBetweenRange(60, 90);
   playing.value = !playing.value;
 
   sections.value = [
@@ -174,7 +174,7 @@ function startEmotionalSong() {
 }
 
 function startStandardMusicalSong() {
-  if (useRandomBpm) setBpmBetweenRange(90, 120);
+  if (useRandomBpm.value) setBpmBetweenRange(90, 120);
   playing.value = !playing.value;
 
   sections.value = defaultSections;
@@ -193,7 +193,7 @@ function startStandardMusicalSong() {
 }
 
 function startUpbeatMusicalSong() {
-  if (useRandomBpm) setBpmBetweenRange(120, 180);
+  if (useRandomBpm.value) setBpmBetweenRange(120, 180);
   playing.value = !playing.value;
 
   sections.value = defaultSections;

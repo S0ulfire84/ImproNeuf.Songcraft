@@ -67,8 +67,8 @@ function initializeSoundSystem() {
     { name: "Big clap", beats: [8], sound: loadSound("/big-clap.mp3") },
     { name: "Finger snap", beats: [2, 6], sound: loadSound("/finger-snap.mp3") },
     { name: "Hi-hat", beats: [4], sound: loadSound("/hi-hat.mp3") },
-    { name: "Metronome 1", beats: [], sound: loadSound("/metronome1.mp3") },
-    { name: "Metronome 2", beats: [], sound: loadSound("/metronome2.mp3") },
+    //{ name: "Metronome 1", beats: [1, 3, 5, 7], sound: loadSound("/metronome1.mp3") },
+    //{ name: "Metronome 2", beats: [2, 4, 5, 6, 8], sound: loadSound("/metronome2.mp3") },
     { name: "Small clap", beats: [], sound: loadSound("/small-clap.mp3") },
   ];
 }
