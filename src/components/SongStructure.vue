@@ -103,6 +103,10 @@ watch(
   margin: 0.8rem 0;
   transition: width 1s linear;
   border-radius: 0.7rem;
+  background-size: calc(100% / 8) 100%;
+  background-image: linear-gradient(to right, rgba(107, 107, 107, 0.5) 3px, transparent 1px);
+  background-repeat: repeat-x;
+  justify-content: flex-start;
 }
 
 .phrase-progress {
