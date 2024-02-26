@@ -22,7 +22,7 @@
       Tap Rhythm
     </button>
     <img src="../assets/settings.png" alt="Metronome" style="margin-left: 30px; width: 30px; height: 30px" @click="toggleLoopEditor" />
-    <BeatLoopEditor v-if="showLoopEditor" :resolution="resolution" :sounds="sounds" @update:loop-structure="updateLoopStructure" />
+    <BeatLoopEditor v-if="showLoopEditor" :resolution="resolution" :sounds="sounds" @update:sounds="updateSounds" />
   </div>
 </template>
 
@@ -41,6 +41,7 @@ const props = defineProps({
 interface SoundBeat {
   name: string;
   beats: number[];
+  filename: string;
   sound: Promise<AudioBuffer>;
 }
 
@@ -53,11 +54,9 @@ const scheduleAheadTime = 0.1;
 const lookahead = 25.0;
 let timerID: number | null = null;
 
-function initializeSoundSystem() {
-  if (audioContext.value) return;
+const emptyPromise = new Promise<AudioBuffer>(() => {});
 
-  audioContext.value = new AudioContext();
-  const loadSound = async (url: string): Promise<AudioBuffer> => {
+const loadSound = async (url: string): Promise<AudioBuffer> => {
     if (!audioContext.value) throw new Error("AudioContext not initialized");
     const response = await fetch(url);
     const arrayBuffer = await response.arrayBuffer();
@@ -65,19 +64,27 @@ function initializeSoundSystem() {
     return audioContext.value.decodeAudioData(arrayBuffer);
   };
 
+function initializeSoundSystem() {
+  if (audioContext.value) return;
+
+  audioContext.value = new AudioContext();
+  
   sounds.value = [
-    { name: "Big clap", beats: [8], sound: loadSound("/big-clap.mp3") },
-    { name: "Finger snap", beats: [2, 6], sound: loadSound("/finger-snap.mp3") },
-    { name: "Hi-hat", beats: [4], sound: loadSound("/hi-hat.mp3") },
-    { name: "Metronome 1", beats: [], sound: loadSound("/metronome1.mp3") },
-    { name: "Metronome 2", beats: [], sound: loadSound("/metronome2.mp3") },
-    { name: "Small clap", beats: [], sound: loadSound("/small-clap.mp3") },
-    { name: "Dry kick", beats: [1, 3, 5, 7], sound: loadSound("/kick-dry.wav") },
+    { name: "Big clap", beats: [8], filename:"big-clap.mp3" , sound: emptyPromise},
+    { name: "Finger snap", beats: [2, 6], filename:"finger-snap.mp3", sound: emptyPromise },
+    { name: "Hi-hat", beats: [4], filename: "hi-hat.mp3", sound: emptyPromise },
+    { name: "Metronome 1", beats: [], filename: "metronome1.mp3", sound: emptyPromise },
+    { name: "Metronome 2", beats: [], filename:"metronome2.mp3", sound: emptyPromise },
+    { name: "Small clap", beats: [], filename: "small-clap.mp3", sound: emptyPromise },
+    { name: "Dry kick", beats: [1, 3, 5, 7], filename: "kick-dry.wav", sound: emptyPromise },
   ];
+
+  sounds.value.forEach((sound) => {
+    sound.sound = loadSound(`/${sound.filename}`);
+  });
 }
 
 const sounds = ref<SoundBeat[]>([]);
-const alternateBeat = ref(true);
 const beatCount = ref(0);
 
 // Tap rhythm functionality
@@ -208,9 +215,9 @@ onUnmounted(() => {
   if (tapTimeoutId) clearTimeout(tapTimeoutId); // Clear the timeout when the component is unmounted
 });
 
-function updateLoopStructure(soundName: string, beat: number, isActive: boolean) {
-  // Here, you'd update the sounds array based on user interaction with the BeatLoopEditor
-  console.log(soundName, beat, isActive);
-  // For simplicity, this function prints the parameters. You should implement actual update logic.
+function updateSounds(newSounds: SoundBeat[]) {
+  sounds.value.forEach((sound) => {
+    sound.sound = loadSound(`/${sound.filename}`);
+  });
 }
 </script>
