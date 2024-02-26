@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, type PropType } from "vue";
+import { ref, computed, watch, type PropType } from "vue";
 import type { BeatSound } from "@/core/interfaces.ts";
 
 const resolution = ref(8); // Default resolution
@@ -70,4 +70,13 @@ function updateLoopStructure(sound: BeatSound, beat: number) {
   }
   console.log(props.sounds);
 }
+
+// Watch for changes in sounds prop
+watch(() => props.sounds, (newSounds, oldSounds) => {
+  // This function will be called whenever the sounds prop changes.
+  // You can perform any specific logic you need here.
+  // For just re-rendering, Vue's reactivity system will handle it without needing to do anything here.
+  console.log("Sounds changed", newSounds, oldSounds);
+}, { deep: true });
+
 </script>

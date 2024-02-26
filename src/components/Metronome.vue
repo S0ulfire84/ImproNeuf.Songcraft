@@ -21,7 +21,7 @@
     >
       Tap Rhythm
     </button>
-    <img v-if="false" src="../assets/settings.png" alt="Metronome" style="margin-left: 30px; width: 30px; height: 30px" @click="toggleLoopEditor" />
+    <img src="../assets/settings.png" alt="Metronome" style="margin-left: 30px; width: 30px; height: 30px" @click="toggleLoopEditor" />
     <BeatLoopEditor v-if="showLoopEditor" :resolution="resolution" :sounds="sounds" @update:loop-structure="updateLoopStructure" />
   </div>
 </template>
@@ -54,6 +54,8 @@ const lookahead = 25.0;
 let timerID: number | null = null;
 
 function initializeSoundSystem() {
+  if (audioContext.value) return;
+
   audioContext.value = new AudioContext();
   const loadSound = async (url: string): Promise<AudioBuffer> => {
     if (!audioContext.value) throw new Error("AudioContext not initialized");
@@ -67,9 +69,10 @@ function initializeSoundSystem() {
     { name: "Big clap", beats: [8], sound: loadSound("/big-clap.mp3") },
     { name: "Finger snap", beats: [2, 6], sound: loadSound("/finger-snap.mp3") },
     { name: "Hi-hat", beats: [4], sound: loadSound("/hi-hat.mp3") },
-    //{ name: "Metronome 1", beats: [1, 3, 5, 7], sound: loadSound("/metronome1.mp3") },
-    //{ name: "Metronome 2", beats: [2, 4, 5, 6, 8], sound: loadSound("/metronome2.mp3") },
+    { name: "Metronome 1", beats: [], sound: loadSound("/metronome1.mp3") },
+    { name: "Metronome 2", beats: [], sound: loadSound("/metronome2.mp3") },
     { name: "Small clap", beats: [], sound: loadSound("/small-clap.mp3") },
+    { name: "Dry kick", beats: [1, 3, 5, 7], sound: loadSound("/kick-dry.wav") },
   ];
 }
 
@@ -138,6 +141,7 @@ const playSoundOfBeat = async (time: number) => {
 };
 
 const toggleLoopEditor = () => {
+  initializeSoundSystem();
   showLoopEditor.value = !showLoopEditor.value;
 };
 
