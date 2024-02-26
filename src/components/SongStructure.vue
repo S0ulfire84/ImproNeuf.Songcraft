@@ -1,5 +1,5 @@
 <template>
-  <div class="song">
+  <div class="song" :class="{ 'flash-effect': flashTrigger }">
     <div style="font-size: 5em" v-if="currentSectionIndex < sections.length">
       {{ sections[currentSectionIndex].sectionName }}
     </div>
@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 // Import PropType using a type-only import
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, nextTick } from "vue";
 import type { PropType } from "vue";
 import type { Section } from "@/core/interfaces.ts";
 
@@ -43,10 +43,11 @@ const shouldPlay = computed(() => props.playing);
 const currentIndex = ref(0);
 const currentSectionIndex = ref(0);
 const emit = defineEmits(["done"]);
+const flashTrigger = ref(false);
 
 watch(
   () => props.beat,
-  (beatCount) => {
+  async (beatCount) => {
     if (typeof beatCount === "number") {
       // Update the width of the current phrase
       phraseWidths.value[currentIndex.value] = (beatCount / 8) * 100;
@@ -73,6 +74,12 @@ watch(
         }
       }
     }
+
+    flashTrigger.value = true;
+    await nextTick(); // Wait for the DOM to update
+    setTimeout(() => {
+      flashTrigger.value = false; // Reset after the animation duration
+    }, 500); // This duration should match the animation duration
   }
 );
 </script>
@@ -117,5 +124,18 @@ watch(
   z-index: 1;
   font-size: 10vh;
   display: inline;
+}
+
+@keyframes flash {
+  0%, 100% {
+    background-color: transparent; /* Assuming the original color is transparent or set it to your component's original background color */
+  }
+  10% {
+    background-color: rgb(46, 46, 46); /* The flash color */
+  }
+}
+
+.flash-effect {
+  animation: flash 0.3s;
 }
 </style>
