@@ -15,7 +15,9 @@
         <div class="phrase-text">{{ phrase }}</div>
       </div>
     </div>
-    <div v-if="currentSectionIndex + 1 < sections.length" style="font-size: 5em">Next: {{ sections[currentSectionIndex + 1].sectionName }}</div>
+    <div v-if="currentSectionIndex + 1 < sections.length && sections[currentSectionIndex + 1].sectionName.length > 0" style="font-size: 5em">
+      Next: {{ sections[currentSectionIndex + 1].sectionName }}
+    </div>
   </div>
 </template>
 
@@ -131,7 +133,8 @@ watch(
 }
 
 @keyframes flash {
-  0%, 100% {
+  0%,
+  100% {
     background-color: transparent; /* Assuming the original color is transparent or set it to your component's original background color */
   }
   10% {

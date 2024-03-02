@@ -30,21 +30,21 @@
 
     <!-- Four square images-->
     <div v-if="!playing" style="width: 55%; align-self: center; display: grid; grid-template-columns: 1fr 1fr">
-      <div class="image-button" @click="startSong">
-        <img src="../assets/song-custom.webp" alt="Custom BPM Song" />
-        <div class="image-text">Custom BPM Song</div>
+      <div class="image-button" @click="startNoStructureSong">
+        <img src="../assets/song-custom.webp" alt="No structure song" />
+        <div class="image-text">No Structure Song</div>
       </div>
       <div class="image-button" @click="startEmotionalSong">
-        <img src="../assets/song-solo.webp" alt="Solo Emotional Song" />
-        <div class="image-text">Solo Emotional Song</div>
+        <img src="../assets/song-solo.webp" alt="Solo Bridge Song" />
+        <div class="image-text">Solo Bridge Song</div>
       </div>
       <div class="image-button" @click="startStandardMusicalSong">
         <img src="../assets/song-duet.webp" alt="Duet Standard Song" />
         <div class="image-text">Duet Standard Song</div>
       </div>
       <div class="image-button" @click="startUpbeatMusicalSong">
-        <img src="../assets/song-upbeat.webp" alt="Upbeat Chorus Song" />
-        <div class="image-text">Upbeat Chorus Song</div>
+        <img src="../assets/song-upbeat.webp" alt="Standard Chorus Song" />
+        <div class="image-text">Standard Chorus Song</div>
       </div>
     </div>
 
@@ -69,6 +69,7 @@ import type { Section } from "@/core/interfaces.ts";
 
 const defaultPhrases = ["Phrase 1", "Phrase 2", "Phrase 3", "Phrase 4"];
 const listenPhrases = ["Listen in", "Keep Listening", "Listen to the rhythm", "Be ready to start at 8"];
+const emptyPhrases = ["", "", "", ""];
 const listenColors = ["#10bbf4", "#10bbf4", "#10bbf4", "#d2042a"];
 const defaultPhraseColors = ["#4ddd21", "#bedd21", "#f4b010", "#d2042a"];
 const defaultAABAColors = ["#106ff4", "#106ff4", "#f47600", "#106ff4"];
@@ -77,6 +78,14 @@ const duetColorsPersonB = ["#d2042a", "#d2042a", "#d2042a", "#d2042a"];
 const defaultTaglinePhrases = ["Phrase 1", "Phrase 2", "Phrase 3", "TAGLINE"];
 const chorusAABA = ["Phrase A", "Phrase A", "Phrase B", "Phrase A"];
 const chorusTagline = ["TAGLINE", "TAGLINE", "TAGLINE", "TAGLINE"];
+
+const noStructureSections: Section[] = [
+  {
+    sectionName: "",
+    phrases: emptyPhrases,
+    colors: listenColors,
+  },
+];
 
 const defaultSections: Section[] = [
   {
@@ -128,10 +137,15 @@ const maxTaps = 8;
 const minBPM = 50;
 const maxInterval = (60 / minBPM) * 1000; // Max time interval between taps in milliseconds
 
-function startSong() {
+// Multiply the first section of the noStructureSections array 100 times to create a long song
+for (let i = 0; i < 100; i++) {
+  noStructureSections.push(noStructureSections[0]);
+}
+
+function startNoStructureSong() {
   playing.value = !playing.value;
 
-  sections.value = defaultSections;
+  sections.value = noStructureSections;
 }
 
 function startEmotionalSong() {
