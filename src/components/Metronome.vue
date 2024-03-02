@@ -57,30 +57,30 @@ let timerID: number | null = null;
 const emptyPromise = new Promise<AudioBuffer>(() => {});
 
 const loadSound = async (url: string): Promise<AudioBuffer> => {
-    if (!audioContext.value) throw new Error("AudioContext not initialized");
-    const response = await fetch(url);
-    const arrayBuffer = await response.arrayBuffer();
-    // Ensure decodeAudioData always resolves to AudioBuffer or throws an error
-    return audioContext.value.decodeAudioData(arrayBuffer);
-  };
+  if (!audioContext.value) throw new Error("AudioContext not initialized");
+  const response = await fetch(url);
+  const arrayBuffer = await response.arrayBuffer();
+  // Ensure decodeAudioData always resolves to AudioBuffer or throws an error
+  return audioContext.value.decodeAudioData(arrayBuffer);
+};
 
 function initializeSoundSystem() {
   if (audioContext.value) return;
 
   audioContext.value = new AudioContext();
-  
+
   sounds.value = [
-    { name: "Big clap", beats: [8], filename:"big-clap.mp3" , sound: emptyPromise},
-    { name: "Finger snap", beats: [2, 6], filename:"finger-snap.mp3", sound: emptyPromise },
+    { name: "Base Drum", beats: [1, 3, 5, 7], filename: "bassdrum.mp3", sound: emptyPromise },
+    { name: "Bell", beats: [], filename: "bell.mp3", sound: emptyPromise },
+    { name: "Clap", beats: [8], filename: "clap.mp3", sound: emptyPromise },
+    { name: "Cowbell", beats: [], filename: "cowbell.mp3", sound: emptyPromise },
+    { name: "Finger snap", beats: [], filename: "finger-snap.mp3", sound: emptyPromise },
     { name: "Hi-hat", beats: [4], filename: "hi-hat.mp3", sound: emptyPromise },
-    { name: "Metronome 1", beats: [], filename: "metronome1.mp3", sound: emptyPromise },
-    { name: "Metronome 2", beats: [], filename:"metronome2.mp3", sound: emptyPromise },
-    { name: "Small clap", beats: [], filename: "small-clap.mp3", sound: emptyPromise },
-    { name: "Dry kick", beats: [1, 3, 5, 7], filename: "kick-dry.wav", sound: emptyPromise },
+    { name: "Metronome", beats: [], filename: "metronome.mp3", sound: emptyPromise },
   ];
 
   sounds.value.forEach((sound) => {
-    sound.sound = loadSound(`/${sound.filename}`);
+    sound.sound = loadSound(`/sounds/${sound.filename}`);
   });
 }
 
